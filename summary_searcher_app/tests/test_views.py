@@ -47,7 +47,9 @@ class SearchSummariesViewTest(TestCase):
             file_data = json.load(summaries_file)
             add_summaries_to_db(file_data)
 
-        resp = self.client.get('/search-summaries/', {'searchPhrase': 'make you', 'count': 2})
-        resp_to_compate = b'[{"summary": "The Book in Three Sentences: Practicing meditation and mindfulness will make you at least 10 percent happier.", "author": "Dan Harris", "query": "make you"}, {"summary": "The Book in Three Sentences: The 10X Rule says that 1) you should set targets for yourself that are 10X greater than what you believe you can achieve and", "author": "Grant Cardone", "query": "make you"}]'
+        resp = self.client.get('/search-summaries/', {'searchPhrase':
+                                                      ['make you', 'at least'],
+                                                      'count': 2})
+        resp_to_compate = b'[{"summary": "The Book in Three Sentences: Practicing meditation and mindfulness will make you at least 10 percent happier.", "author": "Dan Harris", "query": "make you"}, {"summary": "The Book in Three Sentences: The 10X Rule says that 1) you should set targets for yourself that are 10X greater than what you believe you can achieve and", "author": "Grant Cardone", "query": "make you"}, {"summary": "The Book in Three Sentences: Practicing meditation and mindfulness will make you at least 10 percent happier.", "author": "Dan Harris", "query": "at least"}]'
         self.assertEqual(resp.status_code, 200)
         self.assertIn(resp_to_compate, resp.content)
