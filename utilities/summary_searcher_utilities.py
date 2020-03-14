@@ -45,7 +45,6 @@ def prepare_inverted_index(summaries):
 
     for a_file, words in title_terms.items():
         for a_word, positions in words.items():
-            # print(a_word, positions)
             inverted_index[a_word][a_file] = positions
     return inverted_index
 
