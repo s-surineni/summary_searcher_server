@@ -1,4 +1,9 @@
-* First install requirements in requirements.txt with `pip install -r requirements.txt`
-* You can run tests by `pytest`
-* Make sure file named `data.json` is present in same folder as `summary_searcher.py`
-* start the program by typing `python summary_searcher.py`
+* First install requirements with `pip install -r requirements.txt`
+* Run migrations with `python manage.py migrate`
+* Load the initial data with `python manage.py prepare_initial_db`
+* You can run tests by `coverage run manage.py test`
+* Start the server by typing `python manage.py runserver`
+
+# Technologies used
+* Django
+* Mongo DB
