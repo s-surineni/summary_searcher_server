@@ -13,6 +13,7 @@ class Summary(models.Model):
                                                               self.author,
                                                               self.title)
 
+
 class InvertedIndex(models.Model):
     word = models.CharField(max_length=30, primary_key=True)
     summaries = JSONField()

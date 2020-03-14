@@ -56,48 +56,46 @@ def look_for_word_in_summaries(word, inverted_index):
         return []
 
 
-def search_summaries(search_text, result_count,
+def search_summaries(inverted_index, search_text,
                      filepath='data.json'):
+
+    search_text_sanitized = sanitize_text(search_text)
+    # We will only find occurence of unique words
+    search_text_sanitized_unique = set(search_text_sanitized)
+
+    summary_words_map = defaultdict(lambda: {'count': 0, 'words': []})
+
+    for word in search_text_sanitized_unique:
+        summaries_containing_words = look_for_word_in_summaries(word,
+                                                                inverted_index)
+
+        for a_summary_id in summaries_containing_words:
+            summary_words_map[a_summary_id]['count'] += 1
+            summary_words_map[a_summary_id]['words'].append(word)
+
+    # Order summaries in the decreasing order of the number of word matches
+    freq_summary_count = []
+    for a_summary_id in summary_words_map:
+        bisect.insort(freq_summary_count,
+                      (summary_words_map[a_summary_id]['count'],
+                       a_summary_id))
+
+    return freq_summary_count
+
+
+if __name__ == '__main__':
+    inverted_index = None
     try:
-        filepath = os.path.dirname(os.path.realpath(__file__)) + os.path.sep + filepath
+        filepath = (os.path.dirname(os.path.realpath(__file__))
+                    + os.path.sep
+                    + filepath)
         with open(filepath) as summaries_file:
             file_data = json.load(summaries_file)
             inverted_index = prepare_inverted_index(file_data['summaries'])
-            search_text_sanitized = sanitize_text(search_text)
-            # We will only find occurence of unique words
-            search_text_sanitized_unique = set(search_text_sanitized)
-
-            summary_words_map = defaultdict(lambda: {'count': 0, 'words': []})
-
-            for word in search_text_sanitized_unique:
-                summaries_containing_words = look_for_word_in_summaries(word,
-                                                                        inverted_index)
-
-                for a_summary_id in summaries_containing_words:
-                    summary_words_map[a_summary_id]['count'] += 1
-                    summary_words_map[a_summary_id]['words'].append(word)
-
-            # Order summaries in the decreasing order of the number of word matches
-            num_summaries_matched = len(summary_words_map)
-            freq_summary_count = []
-            for a_summary_id in summary_words_map:
-                bisect.insort(freq_summary_count,
-                              (summary_words_map[a_summary_id]['count'],
-                               a_summary_id))
-
-            max_word_summaries = []
-            titles = file_data['titles']
-            
-            for a_summary in freq_summary_count[(num_summaries_matched) - 1:num_summaries_matched - 1 - result_count:-1]:
-                max_word_summaries.append({titles[a_summary[1]]:
-                                           summary_words_map[a_summary[1]]})
-            return max_word_summaries
     except FileNotFoundError:
         logger.error('Make sure you\'ve included file in the folder: {}'
                      .format(os.path.dirname(os.path.realpath(__file__))))
 
-
-if __name__ == '__main__':
     while True:
         search_text = input('''Please enter the text you want to search for:
 Else exit() to exit:
@@ -107,4 +105,4 @@ Else exit() to exit:
             break
         result_count = int(input('Please enter the number of matches you want: ').strip())
 
-        print(search_summaries(search_text, result_count))
+        print(search_summaries(inverted_index, search_text, result_count))
